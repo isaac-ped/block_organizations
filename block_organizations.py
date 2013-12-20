@@ -1,7 +1,24 @@
 import numpy as np
 import sys
+def minimize_grid(grid):
+    nz_locs = np.array(np.nonzero(grid==0))
+    if nz_locs.size==0:
+        return None
+    x_min = min(nz_locs[0,:]);
+    x_max = max(nz_locs[0,:]);
+    y_min = min(nz_locs[1,:]);
+    y_max = max(nz_locs[1,:]);
+    return grid[x_min:x_max+1, y_min:y_max+1]
 
-def num_combos(grid, loc):
+def all_rotations(grid):
+    rot1 = np.rot90(grid)
+    rot2 = np.rot90(rot1)
+    rot3 = np.rot90(rot2)
+    flip1 = np.fliplr(grid)
+    flip2 = np.flipud(grid)
+    return (grid, rot1, rot2, rot3, flip1, flip2)
+
+def num_combos(grid, loc, grid_dict):
     """
     Calculates the number of combinations of blocks
     that can fill a grid. The grid is a numpy array of 
@@ -40,7 +57,17 @@ def num_combos(grid, loc):
                 #print ''
                 placements +=1
                 continue
-            placements += num_combos(new_grid, new_loc)   
+
+            min_grid = minimize_grid(new_grid)
+            tupled_grid = tuple([tuple(x) for x in min_grid])
+            if tupled_grid in grid_dict:
+                placements += grid_dict[tupled_grid]
+            else:
+                combos = num_combos(new_grid, new_loc, grid_dict)
+                rotations = all_rotations(min_grid)
+                rot_dict = [(tuple([tuple(x) for x in r]), combos) for r in rotations]
+                grid_dict.update(dict(rot_dict))
+                placements += combos
     return placements
 
 import pdb 
@@ -73,4 +100,4 @@ if __name__=='__main__':
     x_len = int(sys.argv[1])
     y_len = int(sys.argv[2])
     grid = np.zeros((x_len, y_len))
-    print num_combos(grid, [0,0])
+    print num_combos(grid, [0,0], {})
