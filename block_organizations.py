@@ -1,6 +1,23 @@
 import numpy as np
 import sys
 def minimize_grid(grid):
+    """
+    Takes a grid from its full size to just the 
+    bit that contains 0s
+
+    turns 1 1 0 0 1 0
+          1 0 1 1 0 0
+          1 0 0 1 0 0
+          1 1 1 1 1 1
+
+    into
+          1 0 0 1 0
+          0 1 1 0 0
+          0 0 1 0 0
+
+    This will make it so that if the same pattern of remaining blocks
+    occurs anywhere in the grid, it will recognize them
+    """
     nz_locs = np.array(np.nonzero(grid==0))
     if nz_locs.size==0:
         return None
@@ -11,6 +28,9 @@ def minimize_grid(grid):
     return grid[x_min:x_max+1, y_min:y_max+1]
 
 def all_rotations(grid):
+    """
+    returns all rotations of the grid, plus both 'flips'
+    """
     rot1 = np.rot90(grid)
     rot2 = np.rot90(rot1)
     rot3 = np.rot90(rot2)
@@ -59,18 +79,27 @@ def num_combos(grid, loc, grid_dict):
                 continue
 
             min_grid = minimize_grid(new_grid)
+
+            # Have to tuple the grid, because np arrays are not hashable
             tupled_grid = tuple([tuple(x) for x in min_grid])
+
             if tupled_grid in grid_dict:
+                # If it already exists, you don't have to calculate it
+                # Huzzah!
                 placements += grid_dict[tupled_grid]
             else:
+                # Otherwise, calculate the number of combinations with
+                # that grid remaining
                 combos = num_combos(new_grid, new_loc, grid_dict)
+                # Get all of the rotations
                 rotations = all_rotations(min_grid)
-                rot_dict = [(tuple([tuple(x) for x in r]), combos) for r in rotations]
-                grid_dict.update(dict(rot_dict))
+                
+                # Make a dictionary that points all of the rotations to the number
+                # of placements 
+                rot_dict = dict([(tuple([tuple(x) for x in r]), combos) for r in rotations])
+                grid_dict.update(rot_dict)
                 placements += combos
     return placements
-
-import pdb 
 
 def find_next_open(grid, loc):
     """
