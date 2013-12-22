@@ -123,6 +123,9 @@ def find_next_open(grid, loc):
         loc[1] +=1
     return find_next_open(grid, loc)
 
+def run(x_len, y_len):
+    grid = np.zeros((x_len, y_len))
+    return num_combos(grid, [0,0],{})
 
 if __name__=='__main__':
     print 'starting'
