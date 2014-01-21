@@ -127,9 +127,19 @@ def run(x_len, y_len):
     grid = np.zeros((x_len, y_len))
     return num_combos(grid, [0,0],{})
 
+def run_arbitrary(gridfile):
+    a = [[int(x.strip()) for x in y.split()] for y in open(gridfile).readlines()]
+    grid = np.array(a)
+    initial_spot = find_next_open(grid, [0,0])
+    return num_combos(grid, initial_spot, {})
+
+
 if __name__=='__main__':
     print 'starting'
-    x_len = int(sys.argv[1])
-    y_len = int(sys.argv[2])
-    grid = np.zeros((x_len, y_len))
-    print num_combos(grid, [0,0], {})
+    if len(sys.argv)==3:
+        x_len = int(sys.argv[1])
+        y_len = int(sys.argv[2])
+        grid = np.zeros((x_len, y_len))
+        print num_combos(grid, [0,0], {})
+    elif len(sys.argv)==2:
+        print run_arbitrary(sys.argv[1])
